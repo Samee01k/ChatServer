@@ -2,6 +2,8 @@ import socket
 import threading
 import datetime
 import requests
+import psycopg2
+
 
 user = input("Enter your name: ")
 
@@ -9,7 +11,7 @@ host = socket.gethostname()
 ip_address = socket.gethostbyname(host)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((host, 65535))
+client.connect((host, 65005))
 
 #Time
 t = datetime.datetime.now().time()
@@ -28,11 +30,6 @@ country = geo_data['country']
 def receive():
     while True:
         try:
-            
-            #message = client.recv(1024).decode('ascii')
-            #if message == 't':
-            #    client.send(t.encode('ascii'))
-        
             message = client.recv(1024).decode('ascii')
             if message == 'user':
                 client.send(user.encode('ascii'))
@@ -45,8 +42,12 @@ def receive():
             
 def display():
     while True:
+        dbconn = psycopg2.connect("dbname=Chat")
+        cursor = dbconn.cursor()
         message = f'IP address: {ip_add} Local Time : {t}  Location: {city}, {country} 	\n {user}: {input("")}'
+        cursor.execute("INSERT INTO Chathistory (data) VALUES (%s)",(message,))
         client.send(message.encode('ascii'))
+        dbconn.commit()
         
 receive_thread = threading.Thread(target=receive)
 receive_thread.start()

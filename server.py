@@ -1,10 +1,11 @@
 import socket
 import threading
 import datetime
-
+import requests
+import psycopg2
 
 host = socket.gethostname()
-port = 65535
+port = 65005
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
